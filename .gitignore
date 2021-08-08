@@ -30,3 +30,19 @@
 *.exe
 *.out
 *.app
+
+# Ignore any backup files.
+*~
+*.bak
+
+# Ignore kate swap files
+*.kate-swp
+
+# Ignore any build directories
+build*
+
+# Ignore the code files in AVRTools
+AVRTools/*.h
+AVRTools/*.cpp
+AVRTools/*.S
+AVRTools/COPYING
