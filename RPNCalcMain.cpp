@@ -122,13 +122,12 @@ int main()
             switch ( keyNbr )
             {
                 case kKeyZero:
-                    displayFloat( 12.0*1073., 1, theLcd );
+                    displayFloat( 87654321.0, 1, theLcd );
                     c = 'n';
                     break;
 
                 case kKeyOne:
-                    theLcd.setCursor( 1, 13 );
-                    theLcd.print( sizeof( double ) );
+                    displayFloat( 12348765.0, 1, theLcd );;
                     c = 'n';
                     break;
 
@@ -138,7 +137,7 @@ int main()
                     break;
 
                 case kKeyThree:
-                    displayFloat( -12345678.0, 1, theLcd );
+                    displayFloat( 1234567.8e1, 1, theLcd );
                     c = 'n';
                     break;
 
@@ -148,22 +147,22 @@ int main()
                     break;
 
                 case kKeyFive:
-                    displayFloat( -1234567.8, 1, theLcd );
+                    displayFloat( 1234567.8e2, 1, theLcd );
                     c = 'n';
                     break;
 
                 case kKeySix:
-                    displayFloat( 1.2345678, 1, theLcd );
+                    displayFloat( 1234876.5, 1, theLcd );
                     c = 'n';
                     break;
 
                 case kKeySeven:
-                    displayFloat( -1.2345678, 1, theLcd );
+                    displayFloat( 1234876.5e1, 1, theLcd );
                     c = 'n';
                     break;
 
                 case kKeyEight:
-                    displayFloat( 0.12345678, 1, theLcd );
+                    displayFloat( 1234876.5e2, 1, theLcd );
                     c = 'n';
                     break;
 
