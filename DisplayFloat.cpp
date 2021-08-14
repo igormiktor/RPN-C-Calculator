@@ -36,16 +36,20 @@
 #include "Lcd.h"
 
 
+const uint8_t kNumberOfSignificantDigits    = 7;
+const uint8_t kNumberOfDecimals             = kNumberOfSignificantDigits - 1;
+
+
 // char gTheRealBuffer[ 128];
 // char* gBuffer = gTheRealBuffer;
 
-//                          0123456789012345
-//                          xx+d.ddddddde+dd
+//                         0123456789012345
+//                         xxx+d.dddddde+dd
 const PROGMEM char sNan[]   = " * Nan * ";
 const PROGMEM char sInf[]   = " * Inf * ";
 const PROGMEM char sOvf[]   = " * Ovf * ";
 const uint8_t kFltMsgLen    = 9;
-const uint8_t kStartCol     = 2;        // Col count starts at 0
+const uint8_t kStartCol     = 3;        // Col count starts at 0
 
 
 void displayExponent( int8_t ee, uint8_t row, Lcd& theLcd );
@@ -178,23 +182,23 @@ void displayFloat( double number, uint8_t row, Lcd& theLcd )
     }
 
     // Figure out the order of magnitude of the number
-    // log10() is expensive -- candidate to replace a series of comparisons
-    // to figure out order of magnitude
+    // log10() is expensive -- candidate to maybe replace a
+    // series of comparisons to figure out order of magnitude
     int8_t oom = floor( log10( fabs( number ) ) );
 
     // If it is in range to display as a plain number, do it...
-    if ( 0 <= oom && oom < 7 )
+    if ( 0 <= oom && oom < kNumberOfDecimals )
     {
         // How many decimals should we display?
-        int8_t decimals = 7 - oom;
-        theLcd.print( number, decimals );
+        int8_t decimalsToDisplay = kNumberOfDecimals - oom;
+        theLcd.print( number, decimalsToDisplay );
     }
     else
     {
         // It is out of range, so shift it into range
-        // by dividing by the order of magnitude (another place )
-        double scaledNumber = number * pow( 10, -oom );
-        theLcd.print( scaledNumber, 7 );
+        // by dividing by the order of magnitude
+        number *= pow( 10.0, -oom );
+        theLcd.print( number, kNumberOfDecimals );
 
         // Now handle the exponent explicitly
         theLcd.write( 'e' );
