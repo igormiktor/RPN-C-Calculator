@@ -203,7 +203,6 @@ void displayFloat( double number, uint8_t row, Lcd& theLcd )
         theLcd.print( number, kNumberOfDecimals );
 
         // Now handle the exponent explicitly
-        theLcd.write( 'e' );
         displayExponent( oom, row, theLcd );
     }
 }
@@ -211,6 +210,9 @@ void displayFloat( double number, uint8_t row, Lcd& theLcd )
 
 void displayExponent( int8_t ee, uint8_t row, Lcd& theLcd )
 {
+    // Dsiplay the 'e'
+    theLcd.write( 'e' );
+
     // Display the sign and convert to positive value
     if ( ee < 0 )
     {
