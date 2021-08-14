@@ -140,7 +140,7 @@ void displayFloat( double number, uint8_t row, Lcd& theLcd )
         theLcd.write( ' ' );
     }
 
-    // First handle  special cases
+    // First handle special cases
     if ( isnan( number ) )
     {
         char tmp[ kFltMsgLen + 1 ];
@@ -151,6 +151,7 @@ void displayFloat( double number, uint8_t row, Lcd& theLcd )
 
         theLcd.setCursor( row, kStartCol );
         theLcd.write( tmp );
+        return;
     }
     if ( isinf( number ) )
     {
@@ -162,6 +163,7 @@ void displayFloat( double number, uint8_t row, Lcd& theLcd )
 
         theLcd.setCursor( row, kStartCol );
         theLcd.write( tmp );
+        return;
     }
 
     /*
