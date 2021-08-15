@@ -51,7 +51,7 @@ void displayStack( RpnStack& stack, Lcd& lcd );
 
 
 
-// Flag to indicate when we are in numeric entry mode
+// Helper class to manage flags
 class FlagType
 {
 public:
