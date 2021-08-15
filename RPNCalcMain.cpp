@@ -107,7 +107,7 @@ int main()
     RpnStack stack;
 
     // These are to manage button press delays to debounce buttons
-    const int kMinTimeBetweenButtonChecks = 250;            // milliseconds
+    const unsigned int kMinTimeBetweenButtonChecks = 250;       // milliseconds
     static unsigned long sNextTimeButtonPressAccepted = 0;
 
     while ( 1 )
