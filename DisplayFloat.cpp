@@ -131,7 +131,7 @@ size_t printFloat( float number, int digits )
 
 
 
-void displayFloat( double number, uint8_t row, Lcd& theLcd )
+uint8_t displayFloat( double number, uint8_t row, Lcd& theLcd )
 {
     // Clear our portion of LCD
     theLcd.setCursor( row, kStartCol );
@@ -147,11 +147,10 @@ void displayFloat( double number, uint8_t row, Lcd& theLcd )
         strncpy_P( tmp, sNan, kFltMsgLen );
         tmp[ kFltMsgLen ] = 0;
 
-        // TODO: set NAN indicator LED
-
         theLcd.setCursor( row, kStartCol );
         theLcd.write( tmp );
-        return;
+
+        return kNan;
     }
     if ( isinf( number ) )
     {
@@ -159,11 +158,10 @@ void displayFloat( double number, uint8_t row, Lcd& theLcd )
         strncpy_P( tmp, sInf, kFltMsgLen );
         tmp[ kFltMsgLen ] = 0;
 
-        // TODO: set INF indicator LED
-
         theLcd.setCursor( row, kStartCol );
         theLcd.write( tmp );
-        return;
+
+        return kInfinity;
     }
 
     /*
@@ -205,7 +203,10 @@ void displayFloat( double number, uint8_t row, Lcd& theLcd )
         // Now handle the exponent explicitly
         displayExponent( oom, row, theLcd );
     }
+
+    return kNormal;
 }
+
 
 
 void displayExponent( int8_t ee, uint8_t row, Lcd& theLcd )

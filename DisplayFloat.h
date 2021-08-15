@@ -31,7 +31,14 @@
 
 class Lcd;
 
-void displayFloat( double number, uint8_t row, Lcd& theLcd );
+enum
+{
+    kNormal = 0,
+    kNan,
+    kInfinity  
+};
+
+uint8_t displayFloat( double number, uint8_t row, Lcd& theLcd );
 
 
 #endif  // DisplayFloat_h
