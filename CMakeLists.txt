@@ -16,10 +16,11 @@ set( CMAKE_BUILD_TYPE Release )
 enable_language( ASM )
 
 set( Srcs
-        RPNCalcMain.cpp
         KeyPad.cpp
         Lcd.cpp
         DisplayFloat.cpp
+        RPNCalcMain.cpp
+        RpnStack.cpp
     )
 
 
