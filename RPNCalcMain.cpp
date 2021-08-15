@@ -23,7 +23,7 @@
 */
 
 
-
+#include <inttypes.h>
 
 #include <avr/interrupt.h>
 #include <util/atomic.h>
@@ -35,18 +35,272 @@
 #include "PinAssignments.h"
 #include "KeyPad.h"
 #include "Lcd.h"
+#include "RpnStack.h"
 #include "DisplayFloat.h"
 
 // #define pRedLed     GpioPin( B, 0 )
 
-// Flag set by time interrupt to indicate the 1-second clock tick
-bool gTimerFlag = 0;
+
+void displayStack( RpnStack& stack, Lcd& lcd );
+void initializeTimer();
+void updateWatchIcon( Lcd& theLcd );
+void endNumericEntryMode();
+void doNumericKey( RpnStack& stack, uint8_t value );
+void doEnterKey( RpnStack& stack );
+void displayStack( RpnStack& stack, Lcd& lcd );
+
+
+
+// Flag to indicate when we are in numeric entry mode
+class FlagType
+{
+public:
+    FlagType() : mMode( false ) {}
+
+    bool isSet() { return mMode; }
+
+    void clear() { mMode = false; }
+    void set() { mMode = true; }
+
+private:
+    bool mMode;
+};
+
+
+// Flag to indicate when we are in numeric entry mode
+FlagType gNumericEntryMode;
+
+// Flag to indicate that prior key was "Enter"
+FlagType gPreviousKeyWasEnter;
+
+// Flag to indicate the 1-second clock tick
+FlagType gTimerFlag;
+
+
+
+
+
+int main()
+{
+    initSystem();
+    initSystemClock();
+
+    setGpioPinModeOutput( pRedLed );
+    setGpioPinModeOutput( pGreenLed );
+    setGpioPinHigh( pRedLed );
+    setGpioPinHigh( pGreenLed );
+
+    delayMilliseconds( 1000 );
+
+    Lcd theLcd;
+    theLcd.init();
+    //                     0123456789012345
+    theLcd.displayTopRow( "Press any key..." );
+
+    configureKeyPad();
+
+    initializeTimer();
+
+    setGpioPinLow( pRedLed );
+    setGpioPinLow( pGreenLed );
+
+    RpnStack stack;
+
+    // These are to manage button press delays to debounce buttons
+    const int kMinTimeBetweenButtonChecks = 250;            // milliseconds
+    static unsigned long sNextTimeButtonPressAccepted = 0;
+
+    while ( 1 )
+    {
+        if ( gTimerFlag.isSet() )
+        {
+            updateWatchIcon( theLcd );
+        }
+
+        if ( keyPressed() && millis() > sNextTimeButtonPressAccepted )
+        {
+            uint8_t keyNbr = getKeyPressed();
+            theLcd.clearBottomRow();
+            theLcd.setCursor( 1, 15 );
+            switch ( keyNbr )
+            {
+                // Numeric keys...
+
+                case kKeyZero:
+                    doNumericKey( stack, 0 );
+                    break;
+
+                case kKeyOne:
+                    doNumericKey( stack, 1 );
+                    break;
+
+                case kKeyTwo:
+                    doNumericKey( stack, 2 );
+                    break;
+
+                case kKeyThree:
+                    doNumericKey( stack, 3 );
+                    break;
+
+                case kKeyFour:
+                    doNumericKey( stack, 4 );
+                    break;
+
+                case kKeyFive:
+                    doNumericKey( stack, 5 );
+                    break;
+
+                case kKeySix:
+                    doNumericKey( stack, 6 );
+                    break;
+
+                case kKeySeven:
+                    doNumericKey( stack, 7 );
+                    break;
+
+                case kKeyEight:
+                    doNumericKey( stack, 8 );
+                    break;
+
+                case kKeyNine:
+                    doNumericKey( stack, 9 );
+                    break;
+
+
+                // Non-numeric keys...
+
+                case kKeyEnter:
+                    endNumericEntryMode();
+                    doEnterKey( stack );
+                    break;
+
+                case kKeyChangeSign:
+                    stack.changeSign();
+                    gPreviousKeyWasEnter.clear();
+                    break;
+
+                case kKeyAdd:
+                    endNumericEntryMode();
+                    stack.add();
+                    gPreviousKeyWasEnter.clear();
+                    break;
+
+                case kKeySubtract:
+                    endNumericEntryMode();
+                    stack.subtract();
+                    gPreviousKeyWasEnter.clear();
+                    break;
+
+                case kKeyMultiply:
+                    endNumericEntryMode();
+                    stack.multiply();
+                    gPreviousKeyWasEnter.clear();
+                    break;
+
+                case kKeyDivide:
+                    endNumericEntryMode();
+                    stack.divide();
+                    gPreviousKeyWasEnter.clear();
+                    break;
+
+                default:
+                    break;
+            }
+
+            displayStack( stack, theLcd );
+
+            sNextTimeButtonPressAccepted = millis() + kMinTimeBetweenButtonChecks;
+        }
+
+    }
+
+}
+
+
+
+void doNumericKey( RpnStack& stack, uint8_t value )
+{
+    if ( !gNumericEntryMode.isSet() )
+    {
+        // Enter numeric entry mode
+        gNumericEntryMode.set();
+
+        // Only lift the stack if previous key was NOT enter...
+        if ( !gPreviousKeyWasEnter.isSet() )
+        {
+            stack.lift();
+        }
+
+        // Always clear X
+        stack.clearX();
+    }
+
+    // Once in numeric entry mode, we add the number we are accumulating to the stack X
+    stack.addDigitToX( value );
+    gPreviousKeyWasEnter.clear();
+    if ( stack.isInfiniteX() )
+    {
+        // Set the warning LED to indicate the INF
+        setGpioPinHigh( pRedLed );
+
+        // Causing an overflow on digit entry clears numeric entry mode
+        // This allow user to re-start entering a number (which clears X)
+        // No other choice since we don't have a clear or backspace key...
+        // Numeric entry LED stays on to indicate this
+        gNumericEntryMode.clear();
+        // Pretend previous key as a stack lift to avoid re-lifting the stack
+        gPreviousKeyWasEnter.set();
+
+        // Note that we don't just clear X at this time because we need
+        // to display the infinte X together with the INF (red) Led.
+    }
+}
+
+
+
+void doEnterKey( RpnStack& stack )
+{
+    stack.lift();
+    gPreviousKeyWasEnter.set();
+}
+
+
+
+void endNumericEntryMode()
+{
+    setGpioPinLow( pGreenLed );
+    gNumericEntryMode.clear();
+}
+
+
+
+void displayStack( RpnStack& stack, Lcd& lcd )
+{
+    // Set NAN and OVF LCD accordingly
+    displayFloat( stack.Y(), 0, lcd );
+    uint8_t ret = displayFloat( stack.X(), 1, lcd );
+
+    // Set NaN/Inf indicator LED accordingly
+    switch ( ret )
+    {
+        case kNan:
+        case kInfinity:
+            setGpioPinHigh( pRedLed );
+            break;
+
+        default:
+            setGpioPinLow( pRedLed );
+            break;
+    }
+}
+
 
 
 ISR( TIMER1_COMPA_vect )
 {
-    gTimerFlag = 1;
+    gTimerFlag.set();
 }
+
 
 
 void initializeTimer()
@@ -64,13 +318,14 @@ void initializeTimer()
 }
 
 
+
 void updateWatchIcon( Lcd& theLcd )
 {
     static uint8_t iconCounter = 0;
 
     ATOMIC_BLOCK( ATOMIC_RESTORESTATE )
     {
-        gTimerFlag = 0;
+        gTimerFlag.clear();
     }
 
     ++iconCounter;
@@ -78,142 +333,4 @@ void updateWatchIcon( Lcd& theLcd )
 
     theLcd.setCursor( 1, 0 );
     theLcd.write( static_cast<char>( iconCounter ) );
-}
-
-
-int main()
-{
-    initSystem();
-    initSystemClock();
-
-    setGpioPinModeOutput( pRedLed );
-    setGpioPinModeOutput( pGreenLed );
-    setGpioPinHigh( pRedLed );
-//    setGpioPinHigh( pGreenLed );
-
-    delayMilliseconds( 1000 );
-
-    Lcd theLcd;
-    theLcd.init();
-    //                     0123456789012345
-    theLcd.displayTopRow( "Press any key..." );
-
-    configureKeyPad();
-
-    initializeTimer();
-
-    // These are to manage button press delays to debounce buttons
-    const int kMinTimeBetweenButtonChecks = 250;            // milliseconds
-    static unsigned long sNextTimeButtonPressAccepted = 0;
-
-    while ( 1 )
-    {
-        if ( gTimerFlag )
-        {
-            updateWatchIcon( theLcd );
-        }
-
-        if ( keyPressed() && millis() > sNextTimeButtonPressAccepted )
-        {
-            uint8_t keyNbr = getKeyPressed();
-            theLcd.clearBottomRow();
-            theLcd.setCursor( 1, 15 );
-            char c;
-            switch ( keyNbr )
-            {
-                case kKeyZero:
-                    displayFloat( 87654321.0, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyOne:
-                    displayFloat( 12348765.0, 1, theLcd );;
-                    c = 'n';
-                    break;
-
-                case kKeyTwo:
-                    displayFloat( 12345678.0, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyThree:
-                    displayFloat( 1234567.8e1, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyFour:
-                    displayFloat( 1234567.8, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyFive:
-                    displayFloat( 1234567.8e2, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeySix:
-                    displayFloat( 1234876.5, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeySeven:
-                    displayFloat( 1234876.5e1, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyEight:
-                    displayFloat( 1234876.5e2, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyNine:
-                    displayFloat( -0.12345678, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyChangeSign:
-                    displayFloat( 1.0e5, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyEnter:
-                    displayFloat( -1.0e3, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyAdd:
-                    displayFloat( 1.0e18, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeySubtract:
-                    displayFloat( -1.0e13, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyMultiply:
-                    displayFloat( -1.0e-10, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                case kKeyDivide:
-                    displayFloat( -1.0e21, 1, theLcd );
-                    c = 'n';
-                    break;
-
-                default:
-                    c = 'X';
-                    break;
-            }
-
-            if ( c != 'n' )
-            {
-                theLcd.write( c );
-            }
-
-            sNextTimeButtonPressAccepted = millis() + kMinTimeBetweenButtonChecks;
-        }
-
-    }
-
 }
