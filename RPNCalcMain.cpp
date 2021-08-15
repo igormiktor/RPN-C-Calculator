@@ -74,7 +74,7 @@ FlagType gNumericEntryMode;
 FlagType gPreviousKeyWasEnter;
 
 // Flag to indicate the 1-second clock tick
-FlagType gTimerFlag;
+FlagType gTimer1SecondFlag;
 
 
 
@@ -112,7 +112,7 @@ int main()
 
     while ( 1 )
     {
-        if ( gTimerFlag.isSet() )
+        if ( gTimer1SecondFlag.isSet() )
         {
             updateWatchIcon( theLcd );
         }
@@ -298,7 +298,7 @@ void displayStack( RpnStack& stack, Lcd& lcd )
 
 ISR( TIMER1_COMPA_vect )
 {
-    gTimerFlag.set();
+    gTimer1SecondFlag.set();
 }
 
 
@@ -325,7 +325,7 @@ void updateWatchIcon( Lcd& theLcd )
 
     ATOMIC_BLOCK( ATOMIC_RESTORESTATE )
     {
-        gTimerFlag.clear();
+        gTimer1SecondFlag.clear();
     }
 
     ++iconCounter;
