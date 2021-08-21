@@ -28,6 +28,14 @@
 #include <math.h>
 
 
+/*
+    Implement a standard RPN calculator 4-level stack
+    with registers X, Y, Z, and T.
+
+    X is replicated on every stack lift
+    T is replicated on every stack drop
+*/
+
 
 RpnStack::RpnStack()
 : mX( 0.0 ), mY( 0.0 ), mZ( 0.0 ), mT( 0.0 )
@@ -56,7 +64,8 @@ double RpnStack::pop()
 
 void RpnStack::lift()
 {
-    // X --> Y --> Z --> T
+    // X --> Y --> Z --> T --> <discard>
+    // X unchanged
     mT = mZ;
     mZ = mY;
     mY = mX;
@@ -66,7 +75,8 @@ void RpnStack::lift()
 
 void RpnStack::drop()
 {
-    // X <-- Y <-- Z <-- T
+    // <discard> <-- X <-- Y <-- Z <-- T
+    // T unchanged
     mX = mY;
     mY = mZ;
     mZ = mT;
