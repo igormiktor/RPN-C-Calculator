@@ -111,6 +111,9 @@ int main()
     const unsigned int kMinTimeBetweenButtonChecks = 250;       // milliseconds
     static unsigned long sNextTimeButtonPressAccepted = 0;
 
+    // Use this to know to clear LCD on the first keystroke
+    bool isFirstKeyStroke = true;
+
     while ( 1 )
     {
         if ( gTimer1SecondFlag.isSet() )
@@ -120,6 +123,13 @@ int main()
 
         if ( keyPressed() && millis() > sNextTimeButtonPressAccepted )
         {
+            // Clear top row on first keystroke
+            if ( isFirstKeyStroke )
+            {
+                isFirstKeyStroke = false;
+                theLcd.clearTopRow();
+            }
+
             uint8_t keyNbr = getKeyPressed();
             theLcd.clearBottomRow();
             theLcd.setCursor( 1, 15 );
