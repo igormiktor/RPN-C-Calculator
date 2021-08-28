@@ -91,21 +91,24 @@ int main()
     setGpioPinHigh( pRedLed );
     setGpioPinHigh( pGreenLed );
 
-    delayMilliseconds( 1000 );
-
     Lcd theLcd;
     theLcd.init();
     //                     0123456789012345
-    theLcd.displayTopRow( "Press any key..." );
+    theLcd.displayTopRow( "RPN Calculator+" );
 
     configureKeyPad();
 
     initializeTimer();
 
+    RpnStack stack;
+
+    delayMilliseconds( 1000 );
+
+    // We are ready to start
     setGpioPinLow( pRedLed );
     setGpioPinLow( pGreenLed );
-
-    RpnStack stack;
+    //                     0123456789012345
+    theLcd.displayTopRow( "Press any key..." );
 
     // These are to manage button press delays to debounce buttons
     const unsigned int kMinTimeBetweenButtonChecks = 250;       // milliseconds
