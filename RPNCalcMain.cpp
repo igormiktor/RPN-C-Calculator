@@ -112,7 +112,7 @@ int main()
 
     // These are to manage button press delays to debounce buttons
     const unsigned int kMinTimeBetweenButtonChecks = 250;       // milliseconds
-    static unsigned long sNextTimeButtonPressAccepted = 0;
+    unsigned long nextTimeButtonPressAccepted = 0;
 
     // Use this to know to clear LCD on the first keystroke
     bool isFirstKeyStroke = true;
@@ -124,7 +124,7 @@ int main()
             updateWatchIcon( theLcd );
         }
 
-        if ( keyPressed() && millis() > sNextTimeButtonPressAccepted )
+        if ( keyPressed() && millis() > nextTimeButtonPressAccepted )
         {
             // Clear top row on first keystroke
             if ( isFirstKeyStroke )
@@ -223,7 +223,7 @@ int main()
 
             displayStack( stack, theLcd );
 
-            sNextTimeButtonPressAccepted = millis() + kMinTimeBetweenButtonChecks;
+            nextTimeButtonPressAccepted = millis() + kMinTimeBetweenButtonChecks;
         }
 
     }
