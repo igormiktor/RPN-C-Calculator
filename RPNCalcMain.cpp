@@ -44,6 +44,7 @@
 void displayStack( RpnStack& stack, Lcd& lcd );
 void initializeTimer();
 void updateWatchIcon( Lcd& theLcd );
+void startNumericEntryMode();
 void endNumericEntryMode();
 void doNumericKey( RpnStack& stack, uint8_t value );
 void doEnterKey( RpnStack& stack );
@@ -223,10 +224,7 @@ void doNumericKey( RpnStack& stack, uint8_t value )
     if ( !gNumericEntryMode.isSet() )
     {
         // Enter numeric entry mode
-        gNumericEntryMode.set();
-
-        // Only lift the stack if previous key was NOT enter...
-        if ( !gPreviousKeyWasEnter.isSet() )
+        startNumericEntryMode();
         {
             stack.lift();
         }
@@ -264,6 +262,13 @@ void doEnterKey( RpnStack& stack )
     gPreviousKeyWasEnter.set();
 }
 
+
+
+void startNumericEntryMode()
+{
+    setGpioPinHigh( pGreenLed );
+    gNumericEntryMode.set();
+}
 
 
 void endNumericEntryMode()
