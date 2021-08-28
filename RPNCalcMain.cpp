@@ -102,7 +102,7 @@ int main()
 
     RpnStack stack;
 
-    delayMilliseconds( 1000 );
+    delayMilliseconds( 2000 );
 
     // We are ready to start
     setGpioPinLow( pRedLed );
