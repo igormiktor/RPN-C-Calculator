@@ -225,6 +225,14 @@ void doNumericKey( RpnStack& stack, uint8_t value )
     {
         // Enter numeric entry mode
         startNumericEntryMode();
+
+        // Only lift the stack if previous key was NOT enter and
+        // don't currently have a NaN or Inf in X.
+        // NOTE: in a real calculator, want the NaN/Inf to propagate,
+        // but in this calculator there is no way to clear these.  So
+        // this is a bit of a hack.
+        if ( !gPreviousKeyWasEnter.isSet() && !stack.isNanX()
+                && !stack.isInfiniteX() )
         {
             stack.lift();
         }
