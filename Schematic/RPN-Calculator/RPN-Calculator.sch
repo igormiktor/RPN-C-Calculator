@@ -43,8 +43,6 @@ Wire Wire Line
 	5250 2850 5250 3000
 Wire Wire Line
 	8100 4900 9200 4900
-Wire Wire Line
-	6350 2250 9200 2250
 Connection ~ 4950 5250
 Connection ~ 4550 5400
 Wire Wire Line
@@ -587,8 +585,6 @@ Wire Wire Line
 Wire Wire Line
 	1500 2650 1500 2900
 Wire Wire Line
-	9200 2250 9200 4200
-Wire Wire Line
 	8250 4200 8700 4200
 Connection ~ 8250 4200
 Wire Wire Line
@@ -750,4 +746,13 @@ Wire Wire Line
 	6150 2350 6350 2350
 Wire Wire Line
 	6350 2350 6350 2250
+Wire Wire Line
+	6350 1000 9200 1000
+Wire Wire Line
+	9200 1000 9200 4200
+Connection ~ 6350 1000
+Text Label 7600 950  0    50   ~ 0
+5V_Power
+Text Label 2600 4300 0    50   ~ 0
+Ground
 $EndSCHEMATC
