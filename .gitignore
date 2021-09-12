@@ -35,6 +35,7 @@
 *~
 *.bak
 *.~*
+*.*-bak
 
 # Ignore kate swap files
 *.kate-swp
