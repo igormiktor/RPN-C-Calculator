@@ -20,11 +20,15 @@
 *.mod
 *.smod
 
+
 # Compiled Static libraries
 *.lai
 *.la
 *.a
 *.lib
+
+# But do not ignore KiCad libraries
+!*-cache.lib
 
 # Executables
 *.exe
@@ -36,6 +40,12 @@
 *.bak
 *.~*
 *.*-bak
+*.000
+*.bck
+_autosave-*
+*.tmp
+*-save.pro
+*-save.kicad_pcb
 
 # Ignore kate swap files
 *.kate-swp
