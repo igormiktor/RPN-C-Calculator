@@ -46,6 +46,7 @@ _autosave-*
 *.tmp
 *-save.pro
 *-save.kicad_pcb
+fp-info-cache
 
 # Ignore kate swap files
 *.kate-swp
