@@ -26,11 +26,6 @@ The keypad is set up as follows:
 | **Row 3** | 7 | 8 | 9 | - |
 | **Row 4** | +/- | 0 | Enter | + |
 
-The code detects key presses by polling (perhaps to be replaced
-in the future by an interrupt handler).  Keys are dispatched
-using a jump table with the addresses of 16 key-handling functions
-and using the jump table to indirect-call to the appropriate one.  
-
 Notice there is no decimal point key nor exponentiation ('E'
 or 'EE') key.  Only integers can be entered directly: fractional
 numbers or numbers in "scientific notation" must be entered by
