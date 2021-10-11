@@ -42,7 +42,8 @@
 
 
 void displayStack( RpnStack& stack, Lcd& lcd );
-void initializeTimer();
+void initializeWatchTimer();
+void clearWatchTimerFlag();
 void updateWatchIcon( Lcd& theLcd );
 void startNumericEntryMode();
 void endNumericEntryMode();
@@ -98,7 +99,7 @@ int main()
 
     configureKeyPad();
 
-    initializeTimer();
+    initializeWatchTimer();
 
     RpnStack stack;
 
@@ -121,6 +122,7 @@ int main()
     {
         if ( gTimer1SecondFlag.isSet() )
         {
+            clearWatchTimerFlag();
             updateWatchIcon( theLcd );
         }
 
@@ -329,7 +331,7 @@ ISR( TIMER1_COMPA_vect )
 
 
 
-void initializeTimer()
+void initializeWatchTimer()
 {
     // Select CTC mode with prescalar = 256
     TCCR1B = ( 1 << WGM12 ) | ( 1 << CS12 );
@@ -345,14 +347,19 @@ void initializeTimer()
 
 
 
-void updateWatchIcon( Lcd& theLcd )
+void clearWatchTimerFlag()
 {
-    static uint8_t iconCounter = 0;
-
     ATOMIC_BLOCK( ATOMIC_RESTORESTATE )
     {
         gTimer1SecondFlag.clear();
     }
+}
+
+
+
+void updateWatchIcon( Lcd& theLcd )
+{
+    static uint8_t iconCounter = 0;
 
     ++iconCounter;
     iconCounter %= 4;
