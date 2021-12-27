@@ -76,7 +76,7 @@ FlagType gNumericEntryMode;
 FlagType gPreviousKeyWasEnter;
 
 // Flag to indicate the 1-second clock tick
-FlagType gTimer1SecondFlag;
+volatile FlagType gTimer1SecondFlag;
 
 
 
